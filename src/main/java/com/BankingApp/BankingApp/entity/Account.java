@@ -22,8 +22,6 @@ public class Account {
 	
 	private double balance;
 	
-	
-	
 	public Long getId() {
 		return id;
 	}
