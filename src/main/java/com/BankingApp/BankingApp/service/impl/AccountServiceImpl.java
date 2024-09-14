@@ -1,5 +1,8 @@
 package com.BankingApp.BankingApp.service.impl;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
 import com.BankingApp.BankingApp.dto.AccountDto;
@@ -13,6 +16,7 @@ public class AccountServiceImpl implements AccountService{
 
 	private AccountRepository accountRepository;
 	
+	//Constructor Injection
 	public AccountServiceImpl(AccountRepository accountRepository) {
 		super();
 		this.accountRepository = accountRepository;
@@ -23,7 +27,7 @@ public class AccountServiceImpl implements AccountService{
 		Account account = AccountMapper.mapToAccount(accountDto);
 		Account savedAccount = accountRepository.save(account);
 		
-		
+		//Ack for Sender
 		return AccountMapper.mapToAccountDto(savedAccount);
 	}
 
@@ -43,7 +47,34 @@ public class AccountServiceImpl implements AccountService{
 		double totalBalance = account.getBalance() + amount;
 		account.setBalance(totalBalance);
 		Account savedAccount = accountRepository.save(account);
-		return AccountMapper.mapToAccountDto(account);
+		return AccountMapper.mapToAccountDto(savedAccount);
+	}
+
+	@Override
+	public AccountDto withdraw(Long id, double amount) {
+		Account account = accountRepository.findById(id).orElseThrow(() -> new RuntimeException("Account Does not Exist"));
+		if(account.getBalance() < amount)
+		{
+			throw new RuntimeException("Insufficient Balance");
+		}
+		double totalBalance = account.getBalance() - amount;
+		account.setBalance(totalBalance);
+		
+		Account savedAccount = accountRepository.save(account);
+		return AccountMapper.mapToAccountDto(savedAccount);
+	}
+
+	@Override
+	public List<AccountDto> getAllAccounts() {
+		
+		return accountRepository.findAll().stream().map((account)->AccountMapper.mapToAccountDto(account))
+		.collect(Collectors.toList());
+	}
+
+	@Override
+	public void deleteAccount(Long id) {
+		Account account = accountRepository.findById(id).orElseThrow(() -> new RuntimeException("Account Does not Exist"));
+		accountRepository.delete(account);
 	}
 
 	
